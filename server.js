@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // 1) to handle getting all posts and their comments
 app.get('/posts', function(req, res){
   Post.find(function (error, posts){
-    res.send(posts);
+    res.send(posts)
   });
   
 });
