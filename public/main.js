@@ -22,8 +22,7 @@ var SpacebookApp = function () {
 
   function _renderPosts() {
     $posts.empty();
-    var $template =  $('#post-template');
-    var source =$template.html();
+    var source = $('#post-template').html();
     var template = Handlebars.compile(source);
     for (var i = 0; i < posts.length; i++) {
       var newHTML = template(posts[i]);
@@ -37,10 +36,11 @@ var SpacebookApp = function () {
     $.ajax({
       type: "POST",
       url: '/posts',
-      data: {text: newPost},
+      data: {
+        text: newPost
+      },
       success: function (post) {
-        posts.push(post);
-        _renderPosts()
+      getData();
       },
       error: function (jqXHR, textStatus, errorThrown) {
         console.log(textStatus);
@@ -62,10 +62,18 @@ var SpacebookApp = function () {
     }
   }
 
-  var removePost = function (index) {
-    posts.splice(index, 1);
-    _renderPosts();
-  };
+  var removePost = function (postId) {
+$.ajax({
+      type: "DELETE",
+      url: '/posts/'+postId,
+      success: function (result) {
+        getData()
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log(textStatus);
+      }
+    });
+ };
 
   var addComment = function (newComment, postIndex) {
     posts[postIndex].comments.push(newComment);
@@ -86,8 +94,8 @@ var SpacebookApp = function () {
     deleteComment: deleteComment,
   };
 };
-
 var app = SpacebookApp();
+var $posts = $(".posts");
 
 app.getData();
 
@@ -101,9 +109,12 @@ $('#addpost').on('click', function () {
   }
 });
 
+var $posts = $(".posts");
+
 $posts.on('click', '.remove-post', function () {
-  var index = $(this).closest('.post').index();;
-  app.removePost(index);
+  var index = $(this).closest('.post').index();
+  var postId=$(this).closest('.post').attr("data-id");
+  app.removePost(postId);
 });
 
 $posts.on('click', '.toggle-comments', function () {
