@@ -40,7 +40,7 @@ var SpacebookApp = function () {
         text: newPost
       },
       success: function (post) {
-      getData();
+        getData();
       },
       error: function (jqXHR, textStatus, errorThrown) {
         console.log(textStatus);
@@ -63,27 +63,44 @@ var SpacebookApp = function () {
   }
 
   var removePost = function (postId) {
-$.ajax({
+    $.ajax({
       type: "DELETE",
-      url: '/posts/'+postId,
-      success: function (result) {
+      url: '/posts/' + postId,
+      success: function (data) {
         getData()
       },
       error: function (jqXHR, textStatus, errorThrown) {
         console.log(textStatus);
       }
     });
- };
+  };
 
-  var addComment = function (newComment, postIndex) {
-    posts[postIndex].comments.push(newComment);
-    _renderComments(postIndex);
+  var addComment = function (newComment, postId) {
+     $.ajax({
+      type: "POST",
+      url: '/posts/'+ postId + '/comments',
+      data: newComment,
+      success: function (data) {
+        getData();
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log(textStatus);
+      }
+    });
   };
 
 
-  var deleteComment = function (postIndex, commentIndex) {
-    posts[postIndex].comments.splice(commentIndex, 1);
-    _renderComments(postIndex);
+  var deleteComment = function (postId, commentId) {
+     $.ajax({
+      type: "DELETE",
+      url: '/posts/' + postId + '/comments/' + commentId,
+      success: function (data) {
+        getData()
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log(textStatus);
+      }
+    });
   };
 
   return {
@@ -113,7 +130,7 @@ var $posts = $(".posts");
 
 $posts.on('click', '.remove-post', function () {
   var index = $(this).closest('.post').index();
-  var postId=$(this).closest('.post').attr("data-id");
+  var postId = $(this).closest('.post').attr("data-id");
   app.removePost(postId);
 });
 
@@ -133,12 +150,13 @@ $posts.on('click', '.add-comment', function () {
   }
 
   var postIndex = $(this).closest('.post').index();
+  var postId = $(this).closest('.post').attr("data-id");
   var newComment = {
     text: $comment.val(),
     user: $user.val()
   };
 
-  app.addComment(newComment, postIndex);
+  app.addComment(newComment, postId);
 
   $comment.val("");
   $user.val("");
@@ -149,6 +167,8 @@ $posts.on('click', '.remove-comment', function () {
   var $commentsList = $(this).closest('.post').find('.comments-list');
   var postIndex = $(this).closest('.post').index();
   var commentIndex = $(this).closest('.comment').index();
+  var postId = $(this).closest('.post').attr("data-id");
+  var commentId = $(this).closest('.comment').attr("data-id");
 
-  app.deleteComment(postIndex, commentIndex);
+  app.deleteComment(postId, commentId);
 });
